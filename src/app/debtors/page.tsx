@@ -25,13 +25,21 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useDebtors } from '@/context/DebtorContext';
+import { useDebtors, Debtor } from '@/context/DebtorContext';
 
 export default function DebtorsPage() {
   const router = useRouter();
   const { debtors, deleteDebtor } = useDebtors();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedDebtorId, setSelectedDebtorId] = useState<number | null>(null);
+
+  const calculateTotal = (debtor: Debtor) => {
+    // 總額 = -(所有負數相加) - (所有正數相加) ?
+    // 邏輯確認：我幫他付 (-40) -> 他欠我 40；他還我 (+100) -> 他欠我 -100。
+    // 所以 他欠我的總額 = -(transactions 金額的總和)
+    const sum = debtor.transactions.reduce((acc, curr) => acc + curr.amount, 0);
+    return -sum;
+  };
 
   const handleLogout = () => {
     router.push('/login');
@@ -94,13 +102,13 @@ export default function DebtorsPage() {
             {debtors.map((debtor) => (
               <TableRow key={debtor.id} hover>
                 <TableCell>{debtor.name}</TableCell>
-                <TableCell>${debtor.totalAmount.toLocaleString()}</TableCell>
+                <TableCell>${calculateTotal(debtor).toLocaleString()}</TableCell>
                 <TableCell align="right">
                   <IconButton
                     color="primary"
                     aria-label="edit"
                     sx={{ mr: 1 }}
-                    onClick={() => router.push(`/debtors/${debtor.id}/edit`)}
+                    onClick={() => router.push(`/debtors/${debtor.id}`)}
                   >
                     <EditIcon />
                   </IconButton>

@@ -16,14 +16,10 @@ export default function AddDebtorPage() {
   const router = useRouter();
   const { addDebtor } = useDebtors();
   const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addDebtor({
-      name,
-      totalAmount: Number(amount),
-    });
+    addDebtor(name);
     router.push('/debtors');
   };
 
@@ -41,15 +37,6 @@ export default function AddDebtorPage() {
             margin="normal"
             value={name}
             onChange={(e) => setName(e.target.value)}
-          />
-          <TextField
-            fullWidth
-            label="欠款總金額"
-            type="number"
-            required
-            margin="normal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
           />
           <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
             <Button
