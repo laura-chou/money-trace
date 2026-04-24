@@ -25,13 +25,32 @@ import {
   CardContent,
   Breadcrumbs,
   Link as MuiLink,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import PaymentIcon from '@mui/icons-material/Payment';
+import MessageIcon from '@mui/icons-material/Message';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useDebtors, Transaction } from '@/context/DebtorContext';
+
+const COLLECTION_TYPES = [
+  { id: 'relaxed', label: '輕鬆提醒', template: '欸跟你提醒一下～之前那筆 {total} 你那邊方便的時候再處理一下喔，不急但我這邊先對一下帳' },
+  { id: 'neutral', label: '事務中性', template: '想跟你確認一下，之前那筆 {total} 目前還沒結清，方便的話再幫我確認一下處理時間，謝謝。' },
+  { id: 'relational', label: '關係維持', template: '這筆 {total} 我這邊還沒收到，想先跟你確認一下狀況，我也不想因為這件事影響我們的關係，再麻煩你了。' },
+  { id: 'polite', label: '明確但客氣', template: '這筆 {total} 我這邊需要整理帳目，想請你這幾天幫我處理一下，謝謝配合。' },
+  { id: 'pressure', label: '現實壓力', template: '這筆 {total} 已經一段時間了，我這邊也有資金安排上的需要，想請你盡快協助處理。' },
+  { id: 'final', label: '最後提醒', template: '這筆 {total} 再麻煩你最晚在這週內處理一下，謝謝你配合。' },
+  { id: 'again', label: '再次提醒', template: '跟你再確認一下，之前那筆 {total} 目前還沒收到，不知道你那邊是不是有看到訊息？再麻煩你回覆一下狀況，謝謝。' },
+];
 
 export default function DebtorDetailPage() {
   const router = useRouter();
@@ -43,6 +62,14 @@ export default function DebtorDetailPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState<'add_expense' | 'add_repayment' | 'edit'>('add_expense');
   const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
+
+  // 討債對話框狀態
+  const [openCollectionDialog, setOpenCollectionDialog] = useState(false);
+  const [collectionMode, setCollectionMode] = useState<'manual' | 'auto'>('manual');
+  const [collectionType, setCollectionType] = useState(COLLECTION_TYPES[0].id);
+  const [collectionMessage, setCollectionMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   // 表單狀態
   const [item, setItem] = useState('');
@@ -58,6 +85,66 @@ export default function DebtorDetailPage() {
   if (!debtor) return null;
 
   const totalAmount = Math.max(0, -debtor.transactions.reduce((acc, curr) => acc + curr.amount, 0));
+
+  const generateMessage = (typeId: string) => {
+    const type = COLLECTION_TYPES.find(t => t.id === typeId) || COLLECTION_TYPES[0];
+    const details = debtor.transactions
+      .map(t => `${t.date} ${t.item}: ${t.amount < 0 ? '-' : '+'}$${Math.abs(t.amount).toLocaleString()}`)
+      .join('\n');
+
+    const totalStr = `$${totalAmount.toLocaleString()}`;
+    const message = `${type.template.replace('{total}', totalStr)}\n\n【明細】\n${details}\n\n總計欠款：${totalStr}`;
+    return message;
+  };
+
+  const handleOpenCollection = (mode: 'manual' | 'auto') => {
+    setCollectionMode(mode);
+    setCollectionType(COLLECTION_TYPES[0].id);
+    setCollectionMessage(generateMessage(COLLECTION_TYPES[0].id));
+    setOpenCollectionDialog(true);
+  };
+
+  const handleCollectionTypeChange = (typeId: string) => {
+    setCollectionType(typeId);
+    setCollectionMessage(generateMessage(typeId));
+  };
+
+  const handleManualShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: '債務提醒',
+          text: collectionMessage,
+        });
+        setSnackbar({ open: true, message: '分享成功', severity: 'success' });
+        setOpenCollectionDialog(false);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Share failed:', err);
+          setSnackbar({ open: true, message: '分享失敗', severity: 'error' });
+        }
+      }
+    } else {
+      // 降級處理：複製到剪貼簿
+      try {
+        await navigator.clipboard.writeText(collectionMessage);
+        setSnackbar({ open: true, message: '瀏覽器不支援直接分享，已將內容複製到剪貼簿', severity: 'success' });
+        setOpenCollectionDialog(false);
+      } catch (err) {
+        setSnackbar({ open: true, message: '複製失敗，請手動選取文字', severity: 'error' });
+      }
+    }
+  };
+
+  const handleAutoSubmit = () => {
+    setIsSubmitting(true);
+    // 模擬 API 呼叫
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSnackbar({ open: true, message: '自動討債請求已送出', severity: 'success' });
+      setOpenCollectionDialog(false);
+    }, 1500);
+  };
 
   const handleOpenAdd = (type: 'add_expense' | 'add_repayment') => {
     setDialogType(type);
@@ -186,6 +273,26 @@ export default function DebtorDetailPage() {
             >
               新增還款 (他還我)
             </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="large"
+              startIcon={<MessageIcon />}
+              onClick={() => handleOpenCollection('manual')}
+              sx={{ px: 3, py: 1.5 }}
+            >
+              手動討債
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              size="large"
+              startIcon={<SmartToyIcon />}
+              onClick={() => handleOpenCollection('auto')}
+              sx={{ px: 3, py: 1.5 }}
+            >
+              自動討債
+            </Button>
           </Box>
         </Grid>
       </Grid>
@@ -282,6 +389,68 @@ export default function DebtorDetailPage() {
           </DialogActions>
         </Box>
       </Dialog>
+
+      {/* 討債彈窗 */}
+      <Dialog open={openCollectionDialog} onClose={() => setOpenCollectionDialog(false)} fullWidth maxWidth="sm">
+        <DialogTitle>
+          {collectionMode === 'manual' ? '手動討債' : '自動討債'}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel id="collection-type-label">提醒類型</InputLabel>
+              <Select
+                labelId="collection-type-label"
+                value={collectionType}
+                label="提醒類型"
+                onChange={(e) => handleCollectionTypeChange(e.target.value)}
+              >
+                {COLLECTION_TYPES.map((type) => (
+                  <MenuItem key={type.id} value={type.id}>{type.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              label="訊息內容"
+              multiline
+              rows={10}
+              value={collectionMessage}
+              onChange={(e) => setCollectionMessage(e.target.value)}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setOpenCollectionDialog(false)} disabled={isSubmitting}>取消</Button>
+          {collectionMode === 'manual' ? (
+            <Button variant="contained" color="primary" onClick={handleManualShare}>
+              分享給其他人
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleAutoSubmit}
+              disabled={isSubmitting}
+              startIcon={isSubmitting && <CircularProgress size={20} color="inherit" />}
+            >
+              {isSubmitting ? '傳送中...' : '送出請求'}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
+      {/* 通知 */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
