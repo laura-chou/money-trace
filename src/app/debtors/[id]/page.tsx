@@ -123,7 +123,7 @@ export default function DebtorDetailPage() {
         setSnackbar({ open: true, message: '分享成功', severity: 'success' });
         setOpenCollectionDialog(false);
       } catch (e) {
-        if ((e as Error).name !== 'AbortError') {
+        if (e instanceof Error && e.name !== 'AbortError') {
           console.error('Share failed:', e);
           setSnackbar({ open: true, message: '分享失敗', severity: 'error' });
         }
@@ -134,7 +134,7 @@ export default function DebtorDetailPage() {
         await navigator.clipboard.writeText(collectionMessage);
         setSnackbar({ open: true, message: '瀏覽器不支援直接分享，已將內容複製到剪貼簿', severity: 'success' });
         setOpenCollectionDialog(false);
-      } catch (e) {
+      } catch {
         setSnackbar({ open: true, message: '複製失敗，請手動選取文字', severity: 'error' });
       }
     }
@@ -238,8 +238,8 @@ export default function DebtorDetailPage() {
         </Breadcrumbs>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4" component="h1">
-            {debtor.name} - 債務明細
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+            債務明細
           </Typography>
           <Button
             variant="outlined"
@@ -252,24 +252,23 @@ export default function DebtorDetailPage() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, md: 5 }}>
+        <Grid size={{ xs: 12, md: 8.5 }}>
           <Card elevation={3} sx={{ bgcolor: '#1a237e', color: 'white', borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
                 {debtor.name}目前欠款總額
               </Typography>
-              <Typography variant="h2" sx={{ fontWeight: 'bold', my: 1 }}>
+              <Typography variant="h1" sx={{ fontWeight: 'bold', my: 1 }}>
                 ${totalAmount.toLocaleString()}
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+              <Typography variant="body1" sx={{ opacity: 0.8 }}>
                 系統根據下方明細即時計算
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 7 }}>
+        <Grid size={{ xs: 12, md: 3.5 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%', justifyContent: 'center' }}>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
               <Button
                 variant="contained"
                 size="large"
@@ -279,10 +278,11 @@ export default function DebtorDetailPage() {
                   bgcolor: '#d32f2f',
                   '&:hover': { bgcolor: '#b71c1c' },
                   px: 4,
-                  py: 1.5,
+                  py: 2.5,
                   borderRadius: 2,
                   fontWeight: 'bold',
-                  fontSize: '1.1rem'
+                  fontSize: '1.2rem',
+                  justifyContent: 'center'
                 }}
               >
                 代付
@@ -296,80 +296,84 @@ export default function DebtorDetailPage() {
                   bgcolor: '#2e7d32',
                   '&:hover': { bgcolor: '#1b5e20' },
                   px: 4,
-                  py: 1.5,
+                  py: 2.5,
                   borderRadius: 2,
                   fontWeight: 'bold',
-                  fontSize: '1.1rem'
+                  fontSize: '1.2rem',
+                  justifyContent: 'center'
                 }}
               >
                 還款
               </Button>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<MessageIcon />}
-                onClick={() => handleOpenCollection('manual')}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  color: '#1a237e',
-                  borderColor: '#1a237e',
-                  fontWeight: 'bold'
-                }}
-              >
-                手動討債
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<SmartToyIcon />}
-                onClick={() => handleOpenCollection('auto')}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  color: '#7b1fa2',
-                  borderColor: '#7b1fa2',
-                  fontWeight: 'bold'
-                }}
-              >
-                自動討債
-              </Button>
-            </Box>
           </Box>
         </Grid>
       </Grid>
 
-      {/* 篩選區塊 */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>日期查詢：</Typography>
-        <TextField
-          type="date"
-          size="small"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          label="開始日期"
-        />
-        <Typography>至</Typography>
-        <TextField
-          type="date"
-          size="small"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-          label="結束日期"
-        />
-        <Button
-          variant="text"
-          onClick={() => { setStartDate(''); setEndDate(''); }}
-          sx={{ ml: 1 }}
-        >
-          清除
-        </Button>
+      {/* 篩選與討債按鈕區塊 */}
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <TextField
+            type="date"
+            size="small"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            label="開始日期"
+          />
+          <Typography>至</Typography>
+          <TextField
+            type="date"
+            size="small"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            label="結束日期"
+          />
+          <Button
+            variant="text"
+            onClick={() => { setStartDate(''); setEndDate(''); }}
+            sx={{ ml: 1, color: 'primary.main', fontWeight: 'bold' }}
+          >
+            清除
+          </Button>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<MessageIcon />}
+            onClick={() => handleOpenCollection('manual')}
+            sx={{
+              px: 3,
+              py: 1,
+              borderRadius: 2,
+              color: '#1a237e',
+              borderColor: '#1a237e',
+              bgcolor: '#f5f5f5',
+              fontWeight: 'bold'
+            }}
+          >
+            手動討債
+          </Button>
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<SmartToyIcon />}
+            onClick={() => handleOpenCollection('auto')}
+            sx={{
+              px: 3,
+              py: 1,
+              borderRadius: 2,
+              color: '#7b1fa2',
+              borderColor: '#7b1fa2',
+              bgcolor: '#fdfbff',
+              fontWeight: 'bold'
+            }}
+          >
+            自動討債
+          </Button>
+        </Box>
       </Box>
 
       <TableContainer component={Paper} elevation={2}>
