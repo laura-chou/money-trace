@@ -35,8 +35,10 @@ import { useDebtors, Debtor } from '@/context/DebtorContext';
 
 export default function DebtorsPage() {
   const router = useRouter();
-  const { debtors, deleteDebtor } = useDebtors();
+  const { debtors, deleteDebtor, addDebtor } = useDebtors();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [newDebtorName, setNewDebtorName] = useState('');
   const [selectedDebtorId, setSelectedDebtorId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -76,6 +78,14 @@ export default function DebtorsPage() {
     setSelectedDebtorId(null);
   };
 
+  const handleAddDebtor = () => {
+    if (newDebtorName.trim()) {
+      addDebtor(newDebtorName.trim());
+      setNewDebtorName('');
+      setOpenAddDialog(false);
+    }
+  };
+
   const filteredDebtors = debtors.filter((debtor) => {
     const amount = calculateTotal(debtor);
     const statusInfo = getStatusInfo(amount);
@@ -97,9 +107,9 @@ export default function DebtorsPage() {
             variant="contained"
             startIcon={<AddIcon />}
             sx={{ mr: 2 }}
-            onClick={() => router.push('/debtors/add')}
+            onClick={() => setOpenAddDialog(true)}
           >
-            新增債務人
+            新增
           </Button>
           <Button
             variant="outlined"
@@ -216,6 +226,37 @@ export default function DebtorsPage() {
           </Button>
           <Button onClick={handleDeleteConfirm} color="error" autoFocus>
             刪除
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 新增債務人視窗 */}
+      <Dialog
+        open={openAddDialog}
+        onClose={() => setOpenAddDialog(false)}
+      >
+        <DialogTitle>新增債務人</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="債務人名稱"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={newDebtorName}
+            onChange={(e) => setNewDebtorName(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleAddDebtor();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpenAddDialog(false)}>取消</Button>
+          <Button onClick={handleAddDebtor} variant="contained" disabled={!newDebtorName.trim()}>
+            新增
           </Button>
         </DialogActions>
       </Dialog>
