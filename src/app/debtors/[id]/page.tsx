@@ -251,37 +251,37 @@ export default function DebtorDetailPage() {
         </Box>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, md: 8.5 }}>
           <Card elevation={3} sx={{ bgcolor: '#1a237e', color: 'white', borderRadius: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <CardContent sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 {debtor.name}目前欠款總額
               </Typography>
-              <Typography variant="h1" sx={{ fontWeight: 'bold', my: 1 }}>
+              <Typography variant="h3" sx={{ fontWeight: 'bold', my: 1 }}>
                 ${totalAmount.toLocaleString()}
               </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.8 }}>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
                 系統根據下方明細即時計算
               </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid size={{ xs: 12, md: 3.5 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, height: '100%', justifyContent: 'center' }}>
               <Button
                 variant="contained"
-                size="large"
+                size="medium"
                 startIcon={<AddIcon />}
                 onClick={() => handleOpenAdd('add_expense')}
                 sx={{
                   bgcolor: '#d32f2f',
                   '&:hover': { bgcolor: '#b71c1c' },
-                  px: 4,
-                  py: 2.5,
+                  px: 3,
+                  py: 1.5,
                   borderRadius: 2,
                   fontWeight: 'bold',
-                  fontSize: '1.2rem',
+                  fontSize: '1.1rem',
                   justifyContent: 'center'
                 }}
               >
@@ -289,17 +289,17 @@ export default function DebtorDetailPage() {
               </Button>
               <Button
                 variant="contained"
-                size="large"
+                size="medium"
                 startIcon={<PaymentIcon />}
                 onClick={() => handleOpenAdd('add_repayment')}
                 sx={{
                   bgcolor: '#2e7d32',
                   '&:hover': { bgcolor: '#1b5e20' },
-                  px: 4,
-                  py: 2.5,
+                  px: 3,
+                  py: 1.5,
                   borderRadius: 2,
                   fontWeight: 'bold',
-                  fontSize: '1.2rem',
+                  fontSize: '1.1rem',
                   justifyContent: 'center'
                 }}
               >
@@ -310,8 +310,20 @@ export default function DebtorDetailPage() {
       </Grid>
 
       {/* 篩選與討債按鈕區塊 */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+      <Box sx={{
+        mb: 3,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: { xs: 'stretch', md: 'center' },
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: 2
+      }}>
+        <Box sx={{
+          display: 'flex',
+          gap: { xs: 1, sm: 2 },
+          alignItems: 'center',
+          flexWrap: 'wrap'
+        }}>
           <TextField
             type="date"
             size="small"
@@ -319,8 +331,9 @@ export default function DebtorDetailPage() {
             onChange={(e) => setStartDate(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
             label="開始日期"
+            sx={{ flex: { xs: 1, sm: 'none' } }}
           />
-          <Typography>至</Typography>
+          <Typography sx={{ display: { xs: 'none', sm: 'block' } }}>至</Typography>
           <TextField
             type="date"
             size="small"
@@ -328,47 +341,59 @@ export default function DebtorDetailPage() {
             onChange={(e) => setEndDate(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
             label="結束日期"
+            sx={{ flex: { xs: 1, sm: 'none' } }}
           />
           <Button
             variant="text"
             onClick={() => { setStartDate(''); setEndDate(''); }}
-            sx={{ ml: 1, color: 'primary.main', fontWeight: 'bold' }}
+            sx={{ ml: { xs: 0, sm: 1 }, color: 'primary.main', fontWeight: 'bold' }}
           >
             清除
           </Button>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{
+          display: 'flex',
+          gap: 2,
+          flexDirection: { xs: 'row', sm: 'row' },
+          justifyContent: { xs: 'space-between', md: 'flex-end' }
+        }}>
           <Button
             variant="outlined"
-            size="large"
+            size="medium"
+            fullWidth={false}
             startIcon={<MessageIcon />}
             onClick={() => handleOpenCollection('manual')}
             sx={{
-              px: 3,
+              flex: 1,
+              px: { xs: 1, sm: 3 },
               py: 1,
               borderRadius: 2,
               color: '#1a237e',
               borderColor: '#1a237e',
               bgcolor: '#f5f5f5',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              whiteSpace: 'nowrap'
             }}
           >
             手動討債
           </Button>
           <Button
             variant="outlined"
-            size="large"
+            size="medium"
+            fullWidth={false}
             startIcon={<SmartToyIcon />}
             onClick={() => handleOpenCollection('auto')}
             sx={{
-              px: 3,
+              flex: 1,
+              px: { xs: 1, sm: 3 },
               py: 1,
               borderRadius: 2,
               color: '#7b1fa2',
               borderColor: '#7b1fa2',
               bgcolor: '#fdfbff',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              whiteSpace: 'nowrap'
             }}
           >
             自動討債
