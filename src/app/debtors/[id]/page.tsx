@@ -36,8 +36,8 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AddIcon from '@mui/icons-material/Add';
-import PaymentIcon from '@mui/icons-material/Payment';
+import PaidIcon from '@mui/icons-material/Paid';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import MessageIcon from '@mui/icons-material/Message';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useDebtors, Transaction } from '@/context/DebtorContext';
@@ -246,7 +246,7 @@ export default function DebtorDetailPage() {
             startIcon={<ArrowBackIcon />}
             onClick={() => router.push('/debtors')}
           >
-            返回列表
+            返回
           </Button>
         </Box>
       </Box>
@@ -272,13 +272,14 @@ export default function DebtorDetailPage() {
               <Button
                 variant="contained"
                 size="medium"
-                startIcon={<AddIcon />}
+                startIcon={<PaidIcon />}
                 onClick={() => handleOpenAdd('add_expense')}
                 sx={{
                   bgcolor: '#d32f2f',
                   '&:hover': { bgcolor: '#b71c1c' },
                   px: 3,
                   py: 1.5,
+                  height: '100%',
                   borderRadius: 2,
                   fontWeight: 'bold',
                   fontSize: '1.1rem',
@@ -290,13 +291,14 @@ export default function DebtorDetailPage() {
               <Button
                 variant="contained"
                 size="medium"
-                startIcon={<PaymentIcon />}
+                startIcon={<PaymentsIcon />}
                 onClick={() => handleOpenAdd('add_repayment')}
                 sx={{
                   bgcolor: '#2e7d32',
                   '&:hover': { bgcolor: '#1b5e20' },
                   px: 3,
                   py: 1.5,
+                  height: '100%',
                   borderRadius: 2,
                   fontWeight: 'bold',
                   fontSize: '1.1rem',
@@ -405,10 +407,10 @@ export default function DebtorDetailPage() {
         <Table sx={{ minWidth: 650 }}>
           <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>日期</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>品項</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>金額</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 'bold' }}>操作</TableCell>
+              <TableCell align="center" sx={{ width: '150px', fontWeight: 'bold' }}>日期</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold' }}>品項</TableCell>
+              <TableCell align="center" sx={{ width: '150px', fontWeight: 'bold' }}>金額</TableCell>
+              <TableCell align="center" sx={{ width: '150px', fontWeight: 'bold' }}>操作</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -421,9 +423,10 @@ export default function DebtorDetailPage() {
             ) : (
               filteredTransactions.map((t) => (
                 <TableRow key={t.id} hover>
-                  <TableCell>{t.date}</TableCell>
-                  <TableCell>{t.item}</TableCell>
+                  <TableCell align="center">{t.date}</TableCell>
+                  <TableCell align="center">{t.item}</TableCell>
                   <TableCell
+                    align="center"
                     sx={{
                       fontWeight: 'bold',
                       color: t.amount < 0 ? 'error.main' : 'success.main',
@@ -431,7 +434,7 @@ export default function DebtorDetailPage() {
                   >
                     {t.amount < 0 ? `- $${Math.abs(t.amount).toLocaleString()}` : `+ $${t.amount.toLocaleString()}`}
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell align="center">
                     <IconButton color="primary" onClick={() => handleOpenEdit(t)}>
                       <EditIcon />
                     </IconButton>
@@ -528,7 +531,7 @@ export default function DebtorDetailPage() {
           <Button onClick={() => setOpenCollectionDialog(false)} disabled={isSubmitting}>取消</Button>
           {collectionMode === 'manual' ? (
             <Button variant="contained" color="primary" onClick={handleManualShare}>
-              分享給其他人
+              分享
             </Button>
           ) : (
             <Button

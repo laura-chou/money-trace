@@ -29,7 +29,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import AddIcon from '@mui/icons-material/Add';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useDebtors, Debtor } from '@/context/DebtorContext';
 
@@ -98,28 +98,18 @@ export default function DebtorsPage() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between' }}>
         <Typography variant="h4" component="h1">
           債務人列表
         </Typography>
-        <Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ mr: 2 }}
-            onClick={() => setOpenAddDialog(true)}
-          >
-            新增
-          </Button>
-          <Button
-            variant="outlined"
-            color="inherit"
-            startIcon={<LogoutIcon />}
-            onClick={handleLogout}
-          >
-            登出
-          </Button>
-        </Box>
+        <Button
+          variant="outlined"
+          color="inherit"
+          startIcon={<LogoutIcon />}
+          onClick={handleLogout}
+        >
+          登出
+        </Button>
       </Box>
 
       {/* 搜尋與篩選區塊 */}
@@ -148,15 +138,29 @@ export default function DebtorsPage() {
           </Select>
         </FormControl>
       </Box>
-
       <TableContainer component={Paper} elevation={2}>
         <Table sx={{ minWidth: 650 }}>
           <TableHead sx={{ backgroundColor: 'primary.main' }}>
             <TableRow>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>名稱</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>欠款總金額</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>狀態</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 'bold' }}>操作</TableCell>
+              <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>
+                名稱
+                <Button
+                  variant="contained"
+                  sx={{
+                    marginLeft: '10px',
+                    bgcolor: '#2e7d32',
+                    '& .MuiButton-startIcon': {
+                      marginRight: 0
+                    }
+                  }}
+                  startIcon={<PersonAddIcon />}
+                  onClick={() => setOpenAddDialog(true)}
+                >
+                </Button>
+              </TableCell>
+              <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>欠款總金額</TableCell>
+              <TableCell align="center" sx={{ width: '200px', color: 'white', fontWeight: 'bold' }}>狀態</TableCell>
+              <TableCell align="center" sx={{ width: '150px', color: 'white', fontWeight: 'bold' }}>操作</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -165,9 +169,9 @@ export default function DebtorsPage() {
               const status = getStatusInfo(amount);
               return (
                 <TableRow key={debtor.id} hover>
-                  <TableCell>{debtor.name}</TableCell>
-                  <TableCell>${amount.toLocaleString()}</TableCell>
-                  <TableCell>
+                  <TableCell align="center">{debtor.name}</TableCell>
+                  <TableCell align="center">${amount.toLocaleString()}</TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={status.label}
                       sx={{
@@ -178,7 +182,7 @@ export default function DebtorsPage() {
                       size="small"
                     />
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell align="center">
                   <IconButton
                     color="primary"
                     aria-label="edit"
